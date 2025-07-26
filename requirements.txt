@@ -1,5 +1,3 @@
-streamlit 
-turtle
-random
-time
-os
+streamlit
+matplotlib
+numpy
