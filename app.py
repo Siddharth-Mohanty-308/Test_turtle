@@ -1,52 +1,45 @@
 import streamlit as st
-import turtle
-import random
+import matplotlib.pyplot as plt
+import numpy as np
 import time
-import os
+import random
 
-# Hide streamlit deprecation warnings
-st.set_option('deprecation.showPyplotGlobalUse', False)
+# Set page config
+st.set_page_config(page_title="Nested Polygons", layout="centered")
 
-# Function to draw polygon inside polygon recursively
-def draw_nested_polygons(t, sides=3, max_sides=7, length=100):
-    if sides > max_sides:
-        return
-    t.color(random.random(), random.random(), random.random())
-    angle = 360 / sides
-    for _ in range(sides):
-        t.forward(length)
-        t.left(angle)
-    # Move to center of current shape
-    t.forward(length / 3)
-    draw_nested_polygons(t, sides + 1, max_sides, length / 1.5)
+st.title("🎨 Nested Polygons with Random Colors")
 
-# Function to clear the screen and draw again
-def draw_once(screen):
-    screen.clear()
-    t = turtle.Turtle()
-    t.speed(0)
-    screen.bgcolor("black")
-    t.pensize(2)
-    t.penup()
-    t.goto(0, 0)
-    t.pendown()
-    draw_nested_polygons(t)
-    screen.update()
-
-# Streamlit app
-st.title("Recursive Turtle Drawing in Streamlit")
-
-# Canvas rendering using turtle (infinite loop simulation)
 placeholder = st.empty()
 
-run = st.checkbox("Run Drawing", value=False)
+def regular_polygon(sides, radius, center=(0, 0)):
+    angle = 2 * np.pi / sides
+    return [
+        (
+            center[0] + radius * np.cos(i * angle - np.pi / 2),
+            center[1] + radius * np.sin(i * angle - np.pi / 2)
+        )
+        for i in range(sides)
+    ]
 
-if run:
-    screen = turtle.Screen()
-    screen.tracer(0)
+# Infinite loop
+run = st.checkbox("Start Drawing", value=False)
 
-    while True:
-        draw_once(screen)
-        time.sleep(2)
+while run:
+    fig, ax = plt.subplots()
+    ax.set_aspect('equal')
+    ax.axis("off")
+    ax.set_xlim(-1.5, 1.5)
+    ax.set_ylim(-1.5, 1.5)
+
+    radius = 1.2
+    for sides in range(3, 8):
+        color = [random.random() for _ in range(3)]
+        polygon = regular_polygon(sides, radius)
+        x, y = zip(*polygon)
+        ax.fill(x, y, color=color, edgecolor="white", linewidth=2)
+        radius *= 0.75  # shrink for next shape
+
+    placeholder.pyplot(fig)
+    time.sleep(1.5)
 else:
-    st.write("Check the box above to start drawing.")
+    st.info("Click the checkbox to start the drawing loop.")
